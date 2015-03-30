@@ -1,17 +1,16 @@
 package view
+
 import (
-    "html/template"
-    "net/http"
+	"net/http"
+	"html/template"
 )
 
-var (
-    tmpls *template.Template
-)
+var tmpls *template.Template
 
 func init(){
-    tmpls = template.Must(template.ParseGlob("./template/*.html"))
+	tmpls = template.Must(template.ParseGlob("./template/*.html"))
 }
 
 func Exec(w http.ResponseWriter, name string, data interface{}) {
-    tmpls.ExecuteTemplate(w, name, data)
+	tmpls.ExecuteTemplate(w, name, data)
 }
