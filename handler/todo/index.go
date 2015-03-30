@@ -20,7 +20,7 @@ func Index(ctx context.Context, w http.ResponseWriter, r *http.Request){
 		Form     createForm
 	}{
 		TodoList: todo.All(repo.Con),
-		Form: f,
+		Form:     f,
 	}
 
 	view.Exec(w, "index.html", data)
