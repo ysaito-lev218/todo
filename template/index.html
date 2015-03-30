@@ -1,0 +1,32 @@
+<html>
+    <body>
+        <h1>Todo List</h1>
+        {{ if .Form.Err }}
+        <b>{{ .Form.Err }}</b>
+        {{ end }}
+        <form action="/create" method="post">
+            <input type="text" name="title" />
+            <input type="submit" value="Add"/>
+        </form>
+        <hr>
+        <ul>
+            {{ range $todo := .TodoList }}
+            <li>
+            {{ if $todo.Finished }}
+                <del>{{ $todo.Title }}</del>
+            {{ else }}
+                {{ $todo.Title }}
+                <form action="/finish" method="post">
+                    <input type="hidden" name="id" value="{{ $todo.ID }}" />
+                    <input type="submit" value="Finish" />
+                </form>
+            {{ end }}
+                <form action="/delete" method="post">
+                    <input type="hidden" name="id" value="{{ $todo.ID }}" />
+                    <input type="submit" value="Del" />
+                </form>
+            </li>
+            {{ end }}
+        </ul>
+    </body>
+</html>
