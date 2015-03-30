@@ -33,8 +33,8 @@ func CreateWithLimit(db repo.DB, title string, limit int) (*Todo, error) {
 
 	// 追加するTODO
 	todo := &Todo {
-		ID: 0,
-		Title: title,
+		ID:       0,
+		Title:    title,
 		Finished: false,
 	}
 
