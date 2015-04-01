@@ -1,12 +1,14 @@
 package main
 
 import (
+	"golang.org/x/net/context"
+
+	"github.com/guregu/db"
 	"github.com/guregu/kami"
 	"github.com/kroton/todo/handler/todo"
 
 	"database/sql"
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/kroton/todo/repo"
 )
 
 func PrePareDB() *sql.DB {
@@ -44,7 +46,10 @@ func PrePareDB() *sql.DB {
 }
 
 func main(){
-	repo.Con = PrePareDB()
+	ctx := context.Background()
+	ctx = db.WithSQL(ctx, "main", PrePareDB())
+
+	kami.Context = ctx
 
 	kami.Get("/", todo.Index)
 	kami.Post("/create", todo.Create)

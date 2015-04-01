@@ -3,18 +3,28 @@ package todo
 import (
 	"fmt"
 	"database/sql"
+	"github.com/guregu/db"
+	"golang.org/x/net/context"
 
 	"github.com/kroton/todo/repo"
 )
 
-type LimitErr error
+// dbコネクションを取り出す
+func getDB(ctx context.Context) *sql.DB {
+	return db.SQL(ctx, "main")
+}
 
-func CreateWithLimit(db repo.DB, title string, limit int) (*Todo, error) {
+func All(ctx context.Context) []*Todo {
+	return all(getDB(ctx))
+}
+
+type LimitErr error
+func CreateWithLimit(ctx context.Context, title string, limit int) (*Todo, error) {
 	var lerr LimitErr = fmt.Errorf("未消化のTODOは%d件しか登録できません", limit)
 
 	// 未消化のTODO件数を調べてlimitを超えないか/超えているかチェックする
 	checker := func(db repo.DB, before bool) error {
-		n, err := CountByFinished(db, false)
+		n, err := countByFinished(db, false)
 		if err != nil {
 			return err
 		}
@@ -26,8 +36,11 @@ func CreateWithLimit(db repo.DB, title string, limit int) (*Todo, error) {
 		return nil
 	}
 
+	// DBを取り出す
+	mainDB := getDB(ctx)
+
 	// 追加する前にチェックしておく
-	if err := checker(db, true); err != nil {
+	if err := checker(mainDB, true); err != nil {
 		return nil, err
 	}
 
@@ -39,8 +52,8 @@ func CreateWithLimit(db repo.DB, title string, limit int) (*Todo, error) {
 	}
 
 	// タイミングによっては追加したあとlimitを超えるかもしれないのでトランザクションにしておく
-	err := repo.Tx(db, func(tx *sql.Tx) error {
-		if err := Create(tx, todo); err != nil {
+	err := repo.Tx(mainDB, func(tx *sql.Tx) error {
+		if err := create(tx, todo); err != nil {
 			return err
 		}
 		if err := checker(tx, false); err != nil {
@@ -57,10 +70,10 @@ func CreateWithLimit(db repo.DB, title string, limit int) (*Todo, error) {
 	return todo, nil
 }
 
-func FinishByID(db repo.DB, id int64) error {
-	return Finish(db, &Todo{ID: id})
+func FinishByID(ctx context.Context, id int64) error {
+	return finish(getDB(ctx), &Todo{ID: id})
 }
 
-func DeleteByID(db repo.DB, id int64) error {
-	return Delete(db, &Todo{ID: id})
+func DeleteByID(ctx context.Context, id int64) error {
+	return delete(getDB(ctx), &Todo{ID: id})
 }

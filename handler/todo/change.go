@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"golang.org/x/net/context"
 
-	"github.com/kroton/todo/repo"
 	"github.com/kroton/todo/model/todo"
 )
 
@@ -15,7 +14,7 @@ func getID(r *http.Request) (int64, error) {
 
 func Finish(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if id, err := getID(r); err == nil {
-		todo.FinishByID(repo.Con, id)
+		todo.FinishByID(ctx, id)
 	}
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
@@ -23,7 +22,7 @@ func Finish(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 
 func Delete(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 	if id, err := getID(r); err == nil {
-		todo.DeleteByID(repo.Con, id)
+		todo.DeleteByID(ctx, id)
 	}
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)

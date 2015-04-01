@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"golang.org/x/net/context"
 
-	"github.com/kroton/todo/repo"
 	"github.com/kroton/todo/model/todo"
 )
 
@@ -33,7 +32,7 @@ func Create(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 			break
 		}
 
-		if _, err := todo.CreateWithLimit(repo.Con, f.Title, 5); err != nil {
+		if _, err := todo.CreateWithLimit(ctx, f.Title, 5); err != nil {
 			// 表示用にエラーを修正する
 			if lerr, ok := err.(todo.LimitErr); ok {
 				f.Err = lerr

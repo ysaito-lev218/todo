@@ -6,12 +6,8 @@ import (
 	"github.com/russross/meddler"
 )
 
-// グローバルなDBコネクション
-var Con *sql.DB
-
 // QueryRow, Query, Execをまとめたinterface
 type DB meddler.DB
-
 
 func Tx(tdb DB, fn func(*sql.Tx) error) error {
 	if tx, ok := tdb.(*sql.Tx); ok {

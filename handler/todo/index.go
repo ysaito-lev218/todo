@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"golang.org/x/net/context"
 
-	"github.com/kroton/todo/repo"
 	"github.com/kroton/todo/view"
 	"github.com/kroton/todo/model/todo"
 )
@@ -19,7 +18,7 @@ func Index(ctx context.Context, w http.ResponseWriter, r *http.Request){
 		TodoList []*todo.Todo
 		Form     createForm
 	}{
-		TodoList: todo.All(repo.Con),
+		TodoList: todo.All(ctx),
 		Form:     f,
 	}
 
