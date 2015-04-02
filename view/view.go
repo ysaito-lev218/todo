@@ -3,14 +3,20 @@ package view
 import (
 	"net/http"
 	"html/template"
+	"golang.org/x/net/context"
 )
 
-var tmpls *template.Template
+type private struct{}
+var reqKey private
 
-func init(){
-	tmpls = template.Must(template.ParseGlob("./template/*.html"))
+func NewContext(ctx context.Context, tmpls *template.Template) context.Context {
+	return context.WithValue(ctx, reqKey, tmpls)
 }
 
-func Exec(w http.ResponseWriter, name string, data interface{}) {
-	tmpls.ExecuteTemplate(w, name, data)
+func FromContext(ctx context.Context) *template.Template {
+	return ctx.Value(reqKey).(*template.Template)
+}
+
+func Exec(ctx context.Context, w http.ResponseWriter, name string, data interface{}) error {
+	return FromContext(ctx).ExecuteTemplate(w, name, data)
 }

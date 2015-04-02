@@ -22,5 +22,5 @@ func Index(ctx context.Context, w http.ResponseWriter, r *http.Request){
 		Form:     f,
 	}
 
-	view.Exec(w, "index.html", data)
+	view.Exec(ctx, w, "index.html", data)
 }

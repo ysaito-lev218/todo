@@ -1,14 +1,17 @@
 package main
 
 import (
-	"golang.org/x/net/context"
+	"database/sql"
+	_ "github.com/mattn/go-sqlite3"
+
+	"html/template"
 
 	"github.com/guregu/db"
 	"github.com/guregu/kami"
-	"github.com/kroton/todo/handler/todo"
+	"golang.org/x/net/context"
 
-	"database/sql"
-	_ "github.com/mattn/go-sqlite3"
+	"github.com/kroton/todo/view"
+	"github.com/kroton/todo/handler/todo"
 )
 
 func PrePareDB() *sql.DB {
@@ -46,9 +49,17 @@ func PrePareDB() *sql.DB {
 }
 
 func main(){
-	ctx := context.Background()
-	ctx = db.WithSQL(ctx, "main", PrePareDB())
+	dbcon := PrePareDB()
+	tmpls := template.Must(template.ParseGlob("./template/*.html"))
 
+	ctx := context.Background()
+	ctx = db.WithSQL(ctx, "main", dbcon)
+	ctx = view.NewContext(ctx, tmpls)
+
+	// dbを閉じる
+	defer db.CloseSQLAll(ctx)
+
+	// 神コンテキスト！
 	kami.Context = ctx
 
 	kami.Get("/", todo.Index)

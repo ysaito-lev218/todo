@@ -9,16 +9,8 @@ import (
 	"github.com/kroton/todo/repo"
 )
 
-// dbコネクションを取り出す
-func getDB(ctx context.Context) *sql.DB {
-	return db.SQL(ctx, "main")
-}
-
-func All(ctx context.Context) []*Todo {
-	return all(getDB(ctx))
-}
-
 type LimitErr error
+
 func CreateWithLimit(ctx context.Context, title string, limit int) (*Todo, error) {
 	var lerr LimitErr = fmt.Errorf("未消化のTODOは%d件しか登録できません", limit)
 
@@ -37,10 +29,10 @@ func CreateWithLimit(ctx context.Context, title string, limit int) (*Todo, error
 	}
 
 	// DBを取り出す
-	mainDB := getDB(ctx)
+	db := getDB(ctx)
 
 	// 追加する前にチェックしておく
-	if err := checker(mainDB, true); err != nil {
+	if err := checker(db, true); err != nil {
 		return nil, err
 	}
 
@@ -52,7 +44,7 @@ func CreateWithLimit(ctx context.Context, title string, limit int) (*Todo, error
 	}
 
 	// タイミングによっては追加したあとlimitを超えるかもしれないのでトランザクションにしておく
-	err := repo.Tx(mainDB, func(tx *sql.Tx) error {
+	err := repo.Tx(db, func(tx *sql.Tx) error {
 		if err := create(tx, todo); err != nil {
 			return err
 		}
@@ -70,10 +62,20 @@ func CreateWithLimit(ctx context.Context, title string, limit int) (*Todo, error
 	return todo, nil
 }
 
+func All(ctx context.Context) []*Todo {
+	return all(getDB(ctx))
+}
+
 func FinishByID(ctx context.Context, id int64) error {
 	return finish(getDB(ctx), &Todo{ID: id})
 }
 
 func DeleteByID(ctx context.Context, id int64) error {
 	return delete(getDB(ctx), &Todo{ID: id})
+}
+
+
+// 依存関係であるDBコネクションをコンテキストから取り出す補助関数
+func getDB(ctx context.Context) *sql.DB {
+	return db.SQL(ctx, "main")
 }
